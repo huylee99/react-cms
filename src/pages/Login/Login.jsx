@@ -45,6 +45,7 @@ export default function Login() {
     });
 
     window.localStorage.setItem(configs.access_token, '123');
+    window.localStorage.setItem('role', 'admin');
     navigate('/');
   };
 

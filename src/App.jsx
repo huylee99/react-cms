@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom';
 // routes
 import AuthRoute from './components/Auth/AuthRoute';
 import GuestRoute from './components/Auth/GuestRoute';
+import RoleRoute from './components/Auth/RoleRoute';
 
 // components
 import MainLayout from '@/components/Layouts/MainLayout/MainLayout';
@@ -15,6 +16,10 @@ import { Kanban } from '@/pages/Kanban';
 import { ListUser, AddUser, DetailUser } from '@/pages/User';
 import { ListProduct, AddProduct, DetailProduct } from '@/pages/Product';
 import { Login } from '@/pages/Login';
+import Error403 from '@/pages//Error/Error403';
+
+// config
+import { ROLE_USER } from './configs';
 
 export default function App() {
 
@@ -23,18 +28,31 @@ export default function App() {
       path: '/',
       element: Dashboard,
       auth: AuthRoute,
-      layout: MainLayout
+      layout: MainLayout,
+      requireRole: [ROLE_USER.ADMIN, ROLE_USER.OPERATOR]
     },
     {
       path: '/kanban',
       element: Kanban,
       auth: AuthRoute,
-      layout: MainLayout
+      layout: MainLayout,
+      requireRole: [ROLE_USER.ADMIN, ROLE_USER.OPERATOR]
+    },
+    {
+      path: '/user',
+      element: ListUser,
+      auth: AuthRoute,
+      layout: MainLayout,
+      requireRole: [ROLE_USER.ADMIN, ROLE_USER.OPERATOR]
     },
     {
       path: '/login',
       element: Login,
       auth: GuestRoute,
+    },
+    {
+      path: '/403',
+      element: Error403
     },
     {
       path: '*',
@@ -48,6 +66,16 @@ export default function App() {
         const AuthComponent = route?.auth || React.Fragment;
         const LayoutComponent = route?.layout || React.Fragment;
         const Component = route?.element || React.Fragment;
+
+        let renderContent = React.Fragment;
+        if(route.requireRole) {
+          renderContent = <RoleRoute requireRole={route.requireRole}>
+            <Component />
+          </RoleRoute>
+        } else {
+          renderContent = <Component />
+        }
+
         return (
           <Route 
             key={index}
@@ -55,7 +83,7 @@ export default function App() {
             element={
               <AuthComponent>
                 <LayoutComponent>
-                  <Component />
+                  {renderContent}
                 </LayoutComponent>
               </AuthComponent>
             } 
